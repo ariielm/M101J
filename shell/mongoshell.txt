@@ -1,0 +1,7 @@
+// ----- Homework 1.1 ----- //
+mongorestore dump;
+
+show dbs;
+use m101;
+db.hw1.findOne();
+// ----- Homework 1.1 ----- //
