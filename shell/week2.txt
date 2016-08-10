@@ -1,0 +1,175 @@
+mongod
+
+mongo
+
+// ----- Creating documents ----- //
+//Inserting a common document
+db.moviesScratch.insertOne({ "title": "Rocky", "year": "1976", "imdb": "tt0075148"});
+db.moviesScratch.find().pretty();
+
+//Inserting a common document with a _id that I want
+db.moviesScratch.insertOne({ "title": "Rocky", "year": "1976", "_id": "tt0075148"});
+
+//Inserting many documents
+db.moviesScratch.insertMany(
+    [
+        {
+	    "imdb" : "tt0084726",
+	    "title" : "Star Trek II: The Wrath of Khan",
+	    "year" : 1982,
+	    "type" : "movie"
+        },
+        {
+	    "imdb" : "tt0796366",
+	    "title" : "Star Trek",
+	    "year" : 2009,
+	    "type" : "movie"
+        },
+        {
+	    "imdb" : "tt1408101",
+	    "title" : "Star Trek Into Darkness",
+	    "year" : 2013,
+	    "type" : "movie"
+        },
+        {
+	    "imdb" : "tt0117731",
+	    "title" : "Star Trek: First Contact",
+	    "year" : 1996,
+	    "type" : "movie"
+        }
+    ]
+);
+
+
+//Droping the collection
+db.moviesScratch.drop();
+
+//Inserting many documents with _id's that I want, but with repeated _id's. It stops on the first error and only inserts 2 documents
+db.moviesScratch.insertMany(
+    [
+        {
+	    "_id" : "tt0084726",
+	    "title" : "Star Trek II: The Wrath of Khan",
+	    "year" : 1982,
+	    "type" : "movie"
+        },
+        {
+	    "_id" : "tt0796366",
+	    "title" : "Star Trek",
+	    "year" : 2009,
+	    "type" : "movie"
+        },
+        {
+	    "_id" : "tt0084726",
+	    "title" : "Star Trek II: The Wrath of Khan",
+	    "year" : 1982,
+	    "type" : "movie"
+        },
+        {
+	    "_id" : "tt1408101",
+	    "title" : "Star Trek Into Darkness",
+	    "year" : 2013,
+	    "type" : "movie"
+        },
+        {
+	    "_id" : "tt0117731",
+	    "title" : "Star Trek: First Contact",
+	    "year" : 1996,
+	    "type" : "movie"
+        }
+    ]
+);
+
+db.moviesScratch.find().pretty();
+
+//Inserting many documents with repeated _id's. It inserts the documents that are not with error and is able to insert all the correct documents
+db.moviesScratch.insertMany(
+    [
+        {
+	    "_id" : "tt0084726",
+	    "title" : "Star Trek II: The Wrath of Khan",
+	    "year" : 1982,
+	    "type" : "movie"
+        },
+        {
+	    "_id" : "tt0796366",
+	    "title" : "Star Trek",
+	    "year" : 2009,
+	    "type" : "movie"
+        },
+        {
+	    "_id" : "tt0084726",
+	    "title" : "Star Trek II: The Wrath of Khan",
+	    "year" : 1982,
+	    "type" : "movie"
+        },
+        {
+	    "_id" : "tt1408101",
+	    "title" : "Star Trek Into Darkness",
+	    "year" : 2013,
+	    "type" : "movie"
+        },
+        {
+	    "_id" : "tt0117731",
+	    "title" : "Star Trek: First Contact",
+	    "year" : 1996,
+	    "type" : "movie"
+        }
+    ],
+    {
+        "ordered": false
+    }
+);
+// ----- Creating documents ----- //
+
+
+
+// ----- Reading documents ----- //
+//Restore the dump of the week 2
+mongorestore dump;
+
+show dbs;
+use video;
+
+//Querying only documents matching the rated = PG-13
+db.movieDetails.find({ rated: "PG-13" } ).pretty();
+
+//Counting the query
+db.movieDetails.find({ rated: "PG-13" } ).count();
+
+//Matching 2 values and counting
+db.movieDetails.find({ rated: "PG-13", year: 2009 } ).count();
+
+//Matching an object value (repair that now, I have to use the double quotes to get into the nested object value)
+db.movieDetails.find( { "tomato.meter": 100 } ).count()
+
+//Find the writers array that matches exactly with the array that I've sent to the query
+db.movieDetails.find({ "writers": ["Ethan Coen", "Joel Coen"] }).count();
+db.movieDetails.find({ "writers": ["Ethan Coen", "Joel Coen"] }).pretty();
+
+//Inverting the order of the writers on the above query (find 0)
+db.movieDetails.find({ "writers": ["Joel Coen", "Ethan Coen"] }).count();
+
+//Finding one writer that matches inside the array of writers (in any order inside the array)
+db.movieDetails.find({ "actors": "Jeff Bridges" }).pretty();
+
+//Finding the first writer that matches on the list of writers
+db.movieDetails.find({ "actors.0": "Jeff Bridges" }).pretty();
+
+//Cursor interation
+var c = db.movieDetails.find();
+var doc = function() { return c.hasNext() ? c.next() : null; }
+c.objsLeftInBatch();
+doc();
+c.objsLeftInBatch();
+
+//Projections
+//Only brings in the cursor the title field and the _id field (the _id is by default brought in the result)
+db.movieDetails.find({ rated: "PG" }, { title: 1 }).pretty();
+
+//Now, just brings on the cursor the title field
+db.movieDetails.find({ rated: "PG" }, { title: 1, _id: 0 }).pretty();
+
+//Excludes the fields writers and actors on the cursor result
+db.movieDetails.find({ rated: "PG" }, { writers: 0, actors: 0, _id: 0 }).pretty();
+// ----- Reading documents ----- //
