@@ -173,3 +173,49 @@ db.movieDetails.find({ rated: "PG" }, { title: 1, _id: 0 }).pretty();
 //Excludes the fields writers and actors on the cursor result
 db.movieDetails.find({ rated: "PG" }, { writers: 0, actors: 0, _id: 0 }).pretty();
 // ----- Reading documents ----- //
+
+
+// ----- Comparison Operators (Query Selectors) ----- //
+//Find movies with runtime greater than 90 minutes
+db.movieDetails.find({ runtime: { $gt: 90 } }).pretty();
+
+db.movieDetails.find({ runtime: { $gt: 90 } }, { _id: 0, title: 1, runtime: 1 }).pretty();
+
+//Find movies with runtime greater than 90 minutes and less than 120 minutes
+db.movieDetails.find({ runtime: { $gt: 90, $lt: 120 } }).pretty();
+
+db.movieDetails.find({ runtime: { $gt: 90, $lt: 120 } }, { _id: 0, title: 1, runtime: 1 }).pretty();
+
+//Find movies with runtime greater equals than 90 minutes and less equals than 120 minutes
+db.movieDetails.find({ runtime: { $gte: 90, $lte: 120 } }, { _id: 0, title: 1, runtime: 1 }).pretty();
+
+//Find movies with tomato.meter greater equals than 95 of note and runtime greater than 180 minutes
+db.movieDetails.find({ "tomato.meter" : { $gte: 95}, runtime: { $gt: 180 } }).pretty();
+
+db.movieDetails.find({ "tomato.meter" : { $gte: 95}, runtime: { $gt: 180 } }, { _id: 0, title: 1, runtime: 1 }).pretty();
+
+//Find all the movies that has a rated field and has a value not equals to UNRATED
+db.movieDetails.find({ rated: { $ne: "UNRATED" } }, { _id: 0, title: 1, rated: 1 }).pretty();
+//The opposite of the above query
+db.movieDetails.find({ rated: "UNRATED" }, { _id: 0, title: 1, rated: 1 }).pretty();
+
+//Find rated movies where the values are "G" or "PG"
+db.movieDetails.find({ rated: { $in: ["G", "PG"] } }, { _id: 0, title: 1, rated: 1 }).pretty();
+
+//Find rated movies where the values are not "G" or "PG"
+db.movieDetails.find({ rated: { $in: ["G", "PG"] } }, { _id: 0, title: 1, rated: 1 }).pretty();
+
+// ----- Comparison Operators (Query Selectors) ----- //
+
+
+
+// ----- Element Operators ----- //
+//Find the movies that has a tomato meter
+db.movieDetails.find({ "tomato.meter": { $exists: true } }).pretty();
+
+//Find the movies that has not a tomato meter
+db.movieDetails.find({ "tomato.meter": { $exists: false } }).pretty();
+
+//Find the movies scratch where the id value is of the type string, not object
+db.moviesScratch.find({ "_id": { $type: "string" } }).pretty();
+// ----- Element Operators ----- //
