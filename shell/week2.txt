@@ -219,3 +219,194 @@ db.movieDetails.find({ "tomato.meter": { $exists: false } }).pretty();
 //Find the movies scratch where the id value is of the type string, not object
 db.moviesScratch.find({ "_id": { $type: "string" } }).pretty();
 // ----- Element Operators ----- //
+
+
+
+// ----- Logical Operators ----- //
+//Find the movies where the tomato.meter is greater than 95 or the metacritic is greater than 88. Only showing the title, tomato.meter and metacritic fields
+db.movieDetails.find({ $or : [ { "tomato.meter": { $gt: 95 } }, { "metacritic": {$gt: 88 } } ] }, { "_id": 0, "title": 1, "metacritic": 1, "tomato.meter": 1 }).pretty();
+
+//Find the movies where the tomato.meter is greater than 95 and the metacritic is greater than 88.
+db.movieDetails.find({ $and : [ { "tomato.meter": { $gt: 95 } }, { "metacritic": {$gt: 88 } } ] }).count();
+//but this query without the $and operator, brings the same result
+db.movieDetails.find({ "tomato.meter": { $gt: 95 },  "metacritic": {$gt: 88 } }).count();
+//The $and operator is necessary when I want to specify multiple criteria on the SAME field.
+db.movieDetails.find({ $and : [ { "metacritic": { $ne: null } }, { "metacritic": { $exists: true } } ] }, { "metacritic": 1 }).pretty();
+//I did not check the difference on the result, but the course says that it is different .-.
+db.movieDetails.find({ "metacritic": { $ne: null }, "metacritic": { $exists: true } }, { "metacritic": 1 })
+
+// ----- Logical Operators ----- //
+
+
+// ----- Regex Operators ----- //
+//Find the movies where the awards.text matches the regex that says that it has to begin with the "Won " sentence
+db.movieDetails.find({ "awards.text": { $regex: /^Won\s.*/ } }).pretty();
+db.movieDetails.find({ "awards.text": { $regex: /^Won\s.*/ } }, { title: 1, awards: 1, _id: 0 }).pretty();
+// ----- Regex Operators ----- //
+
+
+
+// ----- Updating Documents ----- //
+//Updates the movie The Martian setting a poster value
+db.movieDetails.updateOne({title: "The Martian"},
+                          { $set: {poster: "http://ia.media-imdb.com/images/M/MV5BMTc2MTQ3MDA1Nl5BMl5BanBnXkFtZTgwODA3OTI4NjE@._V1_SX300.jpg"} })
+
+//Updates the movie The Martian setting an award object value
+db.movieDetails.updateOne({title: "The Martian"},
+                          { $set: { "awards" : {"wins" : 8,
+		                              "nominations" : 14,
+		                                "text" : "Nominated for 3 Golden Globes. Another 8 wins & 14 nominations." } } });
+
+
+//Updates the The Martian movie increasing the tomato.reviews by 3 and the tomato.userReviews by 25
+db.movieDetails.updateOne({title: "The Martian"},
+                          { $inc: { "tomato.reviews": 3, "tomato.userReviews": 25 } });
+
+//Updates the The Martian movie, creating a new field reviews that is an array of reviews object
+db.movieDetails.updateOne({title: "The Martian"},
+                          {$push: { reviews: { rating: 4.5,
+                                               date: ISODate("2016-01-12T09:00:00Z"),
+                                               reviewer: "Spencer H.",
+                                               text: "The Martian could have been a sad drama film, instead it was a hilarious film with a little bit of drama added to it. The Martian is what everybody wants from a space adventure. Ridley Scott can still make great movies and this is one of his best."} } })
+
+
+
+//Updates the The Martian movie, inserting 3 reviews on the reviews array. Observe the $each operator, it's necessary to insert one object by one on the array.
+db.movieDetails.updateOne({title: "The Martian"},
+                          {$push: { reviews:
+                                    { $each: [
+                                        { rating: 0.5,
+                                          date: ISODate("2016-01-12T07:00:00Z"),
+                                          reviewer: "Yabo A.",
+                                          text: "i believe its ranked high due to its slogan 'Bring him Home' there is nothing in the movie, nothing at all ! Story telling for fiction story !"},
+                                        { rating: 5,
+                                          date: ISODate("2016-01-12T09:00:00Z"),
+                                          reviewer: "Kristina Z.",
+                                          text: "This is a masterpiece. The ending is quite different from the book - the movie provides a resolution whilst a book doesn't."},
+                                        { rating: 2.5,
+                                          date: ISODate("2015-10-26T04:00:00Z"),
+                                          reviewer: "Matthew Samuel",
+                                          text: "There have been better movies made about space, and there are elements of the film that are borderline amateur, such as weak dialogue, an uneven tone, and film cliches."},
+                                        { rating: 4.5,
+                                          date: ISODate("2015-12-13T03:00:00Z"),
+                                          reviewer: "Eugene B",
+                                          text: "This novel-adaptation is humorous, intelligent and captivating in all its visual-grandeur. The Martian highlights an impeccable Matt Damon, power-stacked ensemble and Ridley Scott's masterful direction, which is back in full form."},
+                                        { rating: 4.5,
+                                          date: ISODate("2015-10-22T00:00:00Z"),
+                                          reviewer: "Jens S",
+                                          text: "A declaration of love for the potato, science and the indestructible will to survive. While it clearly is the Matt Damon show (and he is excellent), the supporting cast may be among the strongest seen on film in the last 10 years. An engaging, exciting, funny and beautifully filmed adventure thriller no one should miss."},
+                                        { rating: 4.5,
+                                          date: ISODate("2016-01-12T09:00:00Z"),
+                                          reviewer: "Spencer H.",
+                                          text: "The Martian could have been a sad drama film, instead it was a hilarious film with a little bit of drama added to it. The Martian is what everybody wants from a space adventure. Ridley Scott can still make great movies and this is one of his best."} ] } } } )
+
+
+//If I try to do this, without the $each operator, it will insert an array inside my array
+db.movieDetails.updateOne({title: "The Martian"},
+                          {$push: { reviews: [
+                                        { rating: 4.5,
+                                          date: ISODate("2015-10-22T00:00:00Z"),
+                                          reviewer: "Jens S",
+                                          text: "A declaration of love for the potato, science and the indestructible will to survive. While it clearly is the Matt Damon show (and he is excellent), the supporting cast may be among the strongest seen on film in the last 10 years. An engaging, exciting, funny and beautifully filmed adventure thriller no one should miss."},
+                                        { rating: 4.5,
+                                          date: ISODate("2016-01-12T09:00:00Z"),
+                                          reviewer: "Spencer H.",
+                                          text: "The Martian could have been a sad drama film, instead it was a hilarious film with a little bit of drama added to it. The Martian is what everybody wants from a space adventure. Ridley Scott can still make great movies and this is one of his best."}
+] } } );
+
+
+//Removes all the reviews (all the array of reviews)
+db.movieDetails.updateOne({ title: "The Martian" }, { $unset: { reviews: "" } });
+
+
+//Suppose I want to keep the maximum of 5 reviews on my movie, and I want to keep all the last movies by the review date
+//This query pushes an object inside the array on the first position, limiting the size of the array by 5, excluding the last ones
+db.movieDetails.updateOne({ title: "The Martian" },
+                          {$push: { reviews:
+                                    { $each: [
+                                        { rating: 0.5,
+                                          date: ISODate("2016-01-13T07:00:00Z"),
+                                          reviewer: "Shannon B.",
+                                          text: "Enjoyed watching with my kids!" } ],
+                                      $position: 0,
+                                      $slice: 5 } } } )
+
+
+//Updating the movies removing the field rated from the movies that has the rated: null
+db.movieDetails.updateMany( { rated: null },
+                            { $unset: { rated: "" } } )
+
+//This query brings all movies that has a rated: null or the ones that has not the field rated
+db.movieDetails.find( { rated: null } ).count()
+
+
+
+//Creating a var that receives a document
+var detail = {
+    "title" : "The Martian",
+    "year" : 2015,
+    "rated" : "PG-13",
+    "released" : ISODate("2015-10-02T04:00:00Z"),
+    "runtime" : 144,
+    "countries" : [
+	"USA",
+	"UK"
+    ],
+    "genres" : [
+	"Adventure",
+	"Drama",
+	"Sci-Fi"
+    ],
+    "director" : "Ridley Scott",
+    "writers" : [
+	"Drew Goddard",
+	"Andy Weir"
+    ],
+    "actors" : [
+	"Matt Damon",
+	"Jessica Chastain",
+	"Kristen Wiig",
+	"Jeff Daniels"
+    ],
+    "plot" : "During a manned mission to Mars, Astronaut Mark Watney is presumed dead after a fierce storm and left behind by his crew. But Watney has survived and finds himself stranded and alone on the hostile planet. With only meager supplies, he must draw upon his ingenuity, wit and spirit to subsist and find a way to signal to Earth that he is alive.",
+    "poster" : "http://ia.media-imdb.com/images/M/MV5BMTc2MTQ3MDA1Nl5BMl5BanBnXkFtZTgwODA3OTI4NjE@._V1_SX300.jpg",
+    "imdb" : {
+	"id" : "tt3659388",
+	"rating" : 8.2,
+	"votes" : 187881
+    },
+    "tomato" : {
+	"meter" : 93,
+	"image" : "certified",
+	"rating" : 7.9,
+	"reviews" : 280,
+	"fresh" : 261,
+	"consensus" : "Smart, thrilling, and surprisingly funny, The Martian offers a faithful adaptation of the bestselling book that brings out the best in leading man Matt Damon and director Ridley Scott.",
+	"userMeter" : 92,
+	"userRating" : 4.3,
+	"userReviews" : 104999
+    },
+    "metacritic" : 80,
+    "awards" : {
+	"wins" : 8,
+	"nominations" : 14,
+	"text" : "Nominated for 3 Golden Globes. Another 8 wins & 14 nominations."
+    },
+    "type" : "movie"
+};
+
+//Now, I try to update a movie that matches my imdb.id with the my above document imdb.id.
+//If a document that matches this sentence is not found, then, with my $upsert true will insert the document that I've tried to update with.
+db.movieDetails.updateOne(
+    {"imdb.id": detail.imdb.id},
+    {$set: detail},
+    {upsert: true});
+
+
+//Inserting a document to test the replaceOne method
+db.movies.insertOne({ title: "The Martian", imdb: "tt3659388", year: "2015", type: "movie"});
+
+//Replaces my existing document with the imdb: detail.imdb.id by my entire var detail
+db.movies.replaceOne({ "imdb": detail.imdb.id}, detail);
+
+// ----- Updating Documents ----- //
