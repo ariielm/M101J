@@ -22,7 +22,7 @@ public class SparkFormHandling {
         final Configuration configuration = new Configuration();
         configuration.setClassForTemplateLoading(SparkFormHandling.class, "/");
 
-        Spark.get("/", new Route() {
+        Spark.get(new Route("/") {
             public Object handle(Request request, Response response) {
                 Map<String, Object> fruitsMap = new HashMap<String, Object>();
                 fruitsMap.put("fruits", Arrays.asList("apple", "orange", "banana", "peach"));
@@ -33,14 +33,14 @@ public class SparkFormHandling {
                     fruitPickerTemplate.process(fruitsMap, writer);
                     return writer;
                 } catch (Exception e) {
-                    Spark.halt(500);
+                    halt(500);
                     e.printStackTrace();
                     return null;
                 }
             }
         });
 
-        Spark.post("/favorite_fruit", new Route() {
+        Spark.post(new Route("/favorite_fruit") {
             public Object handle(Request request, Response response) {
                 final String fruit = request.queryParams("fruit");
                 if (fruit == null) {

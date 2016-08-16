@@ -410,3 +410,11 @@ db.movies.insertOne({ title: "The Martian", imdb: "tt3659388", year: "2015", typ
 db.movies.replaceOne({ "imdb": detail.imdb.id}, detail);
 
 // ----- Updating Documents ----- //
+
+
+
+// ----- Homework 2.2 ----- //
+mongoimport --drop -d students -c grades grades.json
+
+db.grades.find({ "score" : { $gte : 65 } }).sort({"score": 1});
+// ----- Homework 2.2 ----- //

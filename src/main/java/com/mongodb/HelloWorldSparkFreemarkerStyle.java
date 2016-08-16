@@ -21,7 +21,7 @@ public class HelloWorldSparkFreemarkerStyle {
         configuration.setClassForTemplateLoading(
                 HelloWorldSparkFreemarkerStyle.class, "/");
 
-        Spark.get("/", new Route() {
+        Spark.get(new Route("/") {
             public Object handle(Request request, Response response) {
                 StringWriter writer = new StringWriter();
                 try {
@@ -32,7 +32,7 @@ public class HelloWorldSparkFreemarkerStyle {
 
                     helloTemplate.process(helloMap, writer);
                 } catch (Exception e) {
-                    Spark.halt(500);
+                    halt(500);
                     e.printStackTrace();
                 }
                 return writer;
