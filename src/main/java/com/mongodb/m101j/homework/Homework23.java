@@ -7,6 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.m101j.util.Helpers;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,34 +28,35 @@ public class Homework23 {
         MongoCursor<Document> removableDocs = collection.find(new Document("type", "homework"))
                 .sort(Sorts.ascending("student_id", "score")).iterator();
 
-        String id;
-        String removableId = "";
-        String studentId;
-        String previousStudentId = "";
+        Document cur = removableDocs.next();
+
+        ObjectId id;
+        ObjectId removableId = cur.getObjectId("_id");
+        Integer studentId;
+        Integer previousStudentId = cur.getInteger("student_id");
         double score;
-        double lowerScore = 100;
+        double lowerScore = cur.getDouble("score");
 
         try {
             while (removableDocs.hasNext()) {
-                Document cur = removableDocs.next();
+                cur = removableDocs.next();
 
-                id = cur.getString("_id");
-                studentId = cur.getString("student_id");
+                id = cur.getObjectId("_id");
+                studentId = cur.getInteger("student_id");
                 score = cur.getDouble("score");
 
-                if(studentId.equals(previousStudentId)) {
+                if(studentId.equals(previousStudentId) && removableDocs.hasNext()) {
                     if (score < lowerScore) {
                         lowerScore = score;
                         removableId = id;
                     }
                 } else {
                     collection.deleteOne(eq("_id", removableId));
-                    removableId = "";
-                    lowerScore = 100;
+                    removableId = cur.getObjectId("_id");
+                    lowerScore = cur.getDouble("score");
                 }
 
                 previousStudentId = studentId;
-                //printJson(cur);
             }
         } finally {
             removableDocs.close();
