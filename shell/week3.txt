@@ -1,0 +1,26 @@
+MongoDB schema design:
+    The main reason of using the mongoDB it's because the database is based on the application domain. The most important is no the relational normalization, but what the application needs. It's made to suit the application data access patterns.
+    -> Rich documents like a field that is an array, also embedded document inside my main document.
+    -> Pre Join (Embed data)
+    -> No merge joins (there is no constraints to guarantee consistency between different collections).
+    -> No constraints (foreign key)
+    -> Atomic operations. MongoDB does not support transactions, so it uses the atomic operations concept. When you try to insert or update a document, or you do it entirely or do nothing.
+    -> No declared schema. If is necessary to add a field to a document inside the collection, you can do it whenever you want it.
+
+    What's the single most important factor in designing your application schema within MongoDB?
+        Matching the data access patterns of your application.
+        
+Living without constraints:
+    In MongoDB there is no constraint (foreign key) so, is responsability of the application to maintain the consistency between the documents.
+    Always try to avoid the embedded documents. If it makes sense from the point of view of the application the collections be separated, so let it separated.
+
+Living without transactions:
+    There is no support to transactions on the MongoDB. So it works with the atomic operation concept.
+    “In an atomic transaction, a series of database operations either all occur, or nothing occurs. A guarantee of atomicity prevents updates to the database occurring only partially, which can cause greater problems than rejecting the whole series outright. In other words, atomicity means indivisibility and irreducibility”
+    For better usage of mongoDB without transactions, there are 3 options:
+    1 - Restructure: restructure the collections so it makes sense to application point of view to be separated and concise to use the concept of atomic operations (by joining or separating)
+    2 - Implement in software: implement the security of consistency on the application, not in the database.
+    3 - Tolerate: tolerate the data inconsistency. Like in Facebook where if you comment a photo at the same time than other user, you will not care about who will be shown first, it doesn't matter.
+
+
+
