@@ -22,5 +22,49 @@ Living without transactions:
     2 - Implement in software: implement the security of consistency on the application, not in the database.
     3 - Tolerate: tolerate the data inconsistency. Like in Facebook where if you comment a photo at the same time than other user, you will not care about who will be shown first, it doesn't matter.
 
+One to One Relations:
+    Employee : Resume
+    There are some possibilities on do the relationship between documents. It's possible to embed the document inside each other or just link the documents with the id of the other document.
+    Example: a employee document has the resume inside it (or vice-versa). Or a employee has the id of the corresponding resume (or vice-versa).
+    There are some considerations to do about what choice you will take:
+    1 - Frequency of access: if you access the Resume 90% of the times, but rarely you access the employee. On this case, you can separate the documents to improve the performance.
+    2 - Size of items: if the Resume is too large, you can separate it from the Employee. Or if the Resume always creating or deleting some fields of it, you also can separate them.
+    3 - Atomicity of data: if you always has to update the Resume when you update the Employee, is wise to keep the Resume embedded on the Employee to maintain the consistency.
+
+One to Many Relations:
+    Example: One City : Many People
+    City with an embedded array of People wouldn't work. The array would get too much large.
+    People with the embedded City also wouldn't be good because of the consistency of each City would be really hard. If you have to update a property of City, would be necessary to access each People an update its city.
+    So the best possibility is to use the true link. The true link is the foreign key constraint. The id of the City could be NYC, and on the Person document I could have a field "city" : "NYC"
+    When is a relation of One to Few, you could embed the document. Example: Post having Comments. You have few comments for a post, so it worths to keep the Comments like an embedded array inside the Post document.
+
+Many to Many Relations:
+    Example: Many Books : Many Authors
+    Making true links between them with an array with the corresponding ID of each other. So you create true links on both.
 
 
+
+// ----- Multikeys ----- //
+Students:
+{  _id: 0,
+    name: 'Andrew',
+    teachers: [1, 7, 10, 23] };
+
+Teachers:
+{ _id: 10,
+    name: 'Tony Stark' };
+
+db.students.find();
+db.teachers.find();
+
+//Want to add a multikey index on the teachers key:
+//Creating a index with the field teachers
+db.students.ensureIndex({'teachers':1});
+
+//Finding students that had the teachers 0 and 1
+db.students.find({ 'teachers': { $all: [0,1] } });
+
+
+//Explain command that show that I'm using the above multikey index
+db.students.find({ 'teachers': { $all: [0,1] } }).explain();
+// ----- Multikeys ----- //
